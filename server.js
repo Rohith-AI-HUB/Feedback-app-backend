@@ -9,10 +9,12 @@ const app = express();
 
 // ✅ Fix CORS - Allow requests from frontend
 app.use(cors({
-  origin: 'http://localhost:3000', // Update this if deploying
+  origin: ['http://localhost:3000', 'https://feedback-app-frontend-ruby.vercel.app'], // Allow Vercel frontend
   methods: 'GET,POST',
   allowedHeaders: 'Content-Type'
 }));
+
+
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -38,6 +40,7 @@ const Feedback = mongoose.model('Feedback', feedbackSchema);
 app.post('/feedback', async (req, res) => {
   const { name, email, message } = req.body;
 
+  // Input validation
   if (!name || !email || !message) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -47,9 +50,11 @@ app.post('/feedback', async (req, res) => {
     await newFeedback.save();
     res.status(201).json({ message: "Feedback submitted successfully!" });
   } catch (error) {
+    console.error("Error saving feedback:", error);
     res.status(500).json({ error: "Error saving feedback" });
   }
 });
+
 
 // ✅ GET /feedback - Retrieve all submitted feedback
 app.get('/feedback', async (req, res) => {
